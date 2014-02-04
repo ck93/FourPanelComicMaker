@@ -61,7 +61,7 @@
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(39, 20);
             this.label2.TabIndex = 2;
-            this.label2.Text = "1.0.1";
+            this.label2.Text = "1.1.0";
             // 
             // label3
             // 
@@ -179,6 +179,7 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "AboutBox";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "关于";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);

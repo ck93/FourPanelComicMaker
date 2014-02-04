@@ -12,6 +12,7 @@ namespace FourPanelComicMaker
     public partial class Settings : Form
     {
         FontFamily temp = Form1.myFontFamily;
+        Color tempColor = Form1.borderColor;
 
         public Settings()
         {
@@ -19,13 +20,20 @@ namespace FourPanelComicMaker
             numericUpDown1.Value = Form1.borderWidth;
             textBox1.Text = Form1.myFontFamily.Name;
             textBox2.Text = Form1.sign;
+            textBox3.Text = Form1.borderColor.Name;
+            if (Form1.borderWidth == 0)
+            {
+                textBox3.Enabled = false;
+                button3.Enabled = false;
+            }
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            if(fontDialog1.ShowDialog() == DialogResult.OK)
+            if (fontDialog1.ShowDialog() == DialogResult.OK)
             {
                 temp = fontDialog1.Font.FontFamily;
+                textBox2.Text = temp.Name;
             }
         }
 
@@ -35,6 +43,29 @@ namespace FourPanelComicMaker
             Form1.myFontFamily = temp;
             Form1.sign = textBox2.Text;
             this.Close();
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            if (colorDialog1.ShowDialog() == DialogResult.OK)
+            {
+                tempColor = colorDialog1.Color;
+                textBox3.Text = tempColor.Name;
+            }
+        }
+
+        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
+        {
+            if (numericUpDown1.Value == 0)
+            {
+                textBox3.Enabled = false;
+                button3.Enabled = false;
+            }
+            else
+            {
+                textBox3.Enabled = true;
+                button3.Enabled = true;
+            }
         }
     }
 }

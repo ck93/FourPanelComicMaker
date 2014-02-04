@@ -22,6 +22,7 @@ namespace FourPanelComicMaker
         int bubbleWidth = 210;
         int bubbleHeight = 180;
         static public int borderWidth = 10;
+        static public Color borderColor = Color.White;
         static public FontFamily myFontFamily = new FontFamily("微软雅黑");
         static public string sign = "Designed by";
         Comic comic1, comic2, comic3, comic4;
@@ -131,7 +132,7 @@ namespace FourPanelComicMaker
             return (Image)result;
         }
 
-        private void DrawStringWrap(Graphics graphic, string text, Rectangle recangle, int bubbleType)
+        private void DrawStringWrap(Graphics g, string text, Rectangle recangle, int bubbleType)
         {
             float fontSize = 80;
             List<string> textRows;
@@ -141,8 +142,8 @@ namespace FourPanelComicMaker
             do
             {
                 myFont = new Font(myFontFamily, fontSize);
-                textRows = GetStringRows(graphic, myFont, text, recangle.Width * 3 / 4);
-                rowHeight = Math.Ceiling(graphic.MeasureString("测试", myFont).Height);
+                textRows = GetStringRows(g, myFont, text, recangle.Width * 2 / 3);
+                rowHeight = Math.Ceiling(g.MeasureString("测试", myFont).Height);
                 switch (bubbleType)
                 {
                     case 0:
@@ -184,7 +185,7 @@ namespace FourPanelComicMaker
                         break;
                     case 2:
                         x = recangle.Left + recangle.Width / 7;
-                        y = recangle.Top + recangle.Height / 4;
+                        y = recangle.Top + recangle.Height / 5;
                         width = recangle.Width * 3 / 4;
                         break;
                     case 3:
@@ -199,7 +200,7 @@ namespace FourPanelComicMaker
                         break;
                 }
                 Rectangle fontRectanle = new Rectangle(x, y + (int)(rowHeight * i), width, (int)rowHeight);
-                graphic.DrawString(textRows[i], myFont, new SolidBrush(Color.Black), fontRectanle, sf);
+                g.DrawString(textRows[i], myFont, new SolidBrush(Color.Black), fontRectanle, sf);
             }
         }
 
@@ -282,25 +283,28 @@ namespace FourPanelComicMaker
         {
             final = new Bitmap(picWidth * 2 + 3 * borderWidth, picHeight * 2 + 3 * borderWidth);
             Graphics g = Graphics.FromImage(final);
-            g.Clear(Color.White);
+            g.Clear(borderColor);
             g.DrawImage(pictureBox1.Image, borderWidth, borderWidth);
             g.DrawImage(pictureBox2.Image, picWidth + 2 * borderWidth, borderWidth);
             g.DrawImage(pictureBox3.Image, borderWidth, picHeight + 2 * borderWidth);
             g.DrawImage(pictureBox4.Image, picWidth + 2 * borderWidth, picHeight + 2 * borderWidth);
-            g.DrawString("①", new Font(myFontFamily, 40), new SolidBrush(Color.White), 40, picHeight - 80);
-            g.DrawString("②", new Font(myFontFamily, 40), new SolidBrush(Color.White), 50 +　picWidth, picHeight - 80);
-            g.DrawString("③", new Font(myFontFamily, 40), new SolidBrush(Color.White), 40,  2 * picHeight - 70);
-            g.DrawString("④", new Font(myFontFamily, 40), new SolidBrush(Color.White), 50 + picWidth, 2 * picHeight - 70);
+            int size = picHeight / 20;
+            SolidBrush sb = new SolidBrush(Color.White);
+            g.DrawString("①", new Font(myFontFamily, size), sb, 40, picHeight - 80);
+            g.DrawString("②", new Font(myFontFamily, size), sb, 50 + picWidth, picHeight - 80);
+            g.DrawString("③", new Font(myFontFamily, size), sb, 40, 2 * picHeight - 70);
+            g.DrawString("④", new Font(myFontFamily, size), sb, 50 + picWidth, 2 * picHeight - 70);
+            sb.Dispose();
             DrawSign(g);
             g.Dispose();
         }
 
         void DrawSign(Graphics g)
         {
-            int signSize = 30;
+            int signSize = picHeight / 20;
             Font signFont = new Font(myFontFamily, signSize);
             int signWidth = picWidth * 2 / 3;
-            Rectangle signRectangle = new Rectangle(picWidth + picWidth / 3, picHeight * 2 - 50, signWidth, 50);
+            Rectangle signRectangle = new Rectangle(picWidth + picWidth / 3, picHeight * 2 - 50, signWidth, picHeight / 12);
             StringFormat drawFormat = new StringFormat();
             drawFormat.Alignment = StringAlignment.Far;
             drawFormat.LineAlignment = StringAlignment.Center;
@@ -312,6 +316,67 @@ namespace FourPanelComicMaker
             g.DrawString(sign, signFont, new SolidBrush(Color.White), signRectangle, drawFormat);
         }
 
+        void Text1ChangedAction(TextBox textBox1, TextBox textBox2, PictureBox picBox, Comic comic)
+        {
+            picBox.Image.Dispose();
+            picBox.Image = comic.DrawImage(bubbleImg);
+            Graphics g = Graphics.FromImage(picBox.Image);
+            if (comic.numOfBubbles > 0)
+            {
+                DrawStringWrap(g, textBox1.Text, comic.GetPosition(0), comic.GetType(0));
+                if (comic.numOfBubbles > 1)
+                    DrawStringWrap(g, textBox2.Text, comic.GetPosition(1), comic.GetType(1));
+            }
+        }
+        void Text2ChangedAction(TextBox textBox1, TextBox textBox2, PictureBox picBox, Comic comic)
+        {
+            picBox.Image.Dispose();
+            picBox.Image = comic.DrawImage(bubbleImg);
+            Graphics g = Graphics.FromImage(picBox.Image);
+            DrawStringWrap(g, textBox1.Text, comic.GetPosition(0), comic.GetType(0));
+            DrawStringWrap(g, textBox2.Text, comic.GetPosition(1), comic.GetType(1));
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            Text1ChangedAction(textBox1, textBox2, pictureBox1, comic1);
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+            Text2ChangedAction(textBox1, textBox2, pictureBox1, comic1);
+        }
+
+        private void textBox3_TextChanged(object sender, EventArgs e)
+        {
+            Text1ChangedAction(textBox3, textBox4, pictureBox2, comic2);
+        }
+
+        private void textBox4_TextChanged(object sender, EventArgs e)
+        {
+            Text2ChangedAction(textBox3, textBox4, pictureBox2, comic2);
+        }
+
+        private void textBox5_TextChanged(object sender, EventArgs e)
+        {
+            Text1ChangedAction(textBox5, textBox6, pictureBox3, comic3);
+        }
+
+        private void textBox6_TextChanged(object sender, EventArgs e)
+        {
+            Text2ChangedAction(textBox5, textBox6, pictureBox3, comic3);
+        }
+
+        private void textBox7_TextChanged(object sender, EventArgs e)
+        {
+            Text1ChangedAction(textBox7, textBox8, pictureBox4, comic4);
+        }
+
+        private void textBox8_TextChanged(object sender, EventArgs e)
+        {
+            Text2ChangedAction(textBox7, textBox8, pictureBox4, comic4);
+        }
+        #region 选择气泡
         private void pictureBox5_Click(object sender, EventArgs e)
         {
             addMode = AddBubble.addBubble1;
@@ -331,6 +396,7 @@ namespace FourPanelComicMaker
         {
             addMode = AddBubble.addBubble4;
         }
+        #endregion
 
         #region 四幅图像的鼠标响应事件
         void MouseMoveAction(PictureBox picBox, Comic comic, MouseEventArgs e)
@@ -442,6 +508,8 @@ namespace FourPanelComicMaker
 
         void MouseLeaveAction(PictureBox picBox, Comic comic)
         {
+            if (addMode == AddBubble.none)
+                return;
             picBox.Image = comic.DrawImage(bubbleImg);
             if (moveBubble)
             {
@@ -571,6 +639,7 @@ namespace FourPanelComicMaker
         }
         #endregion
 
+        #region 菜单栏部分
         private void 关于ToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             AboutBox abourBox = new AboutBox();
@@ -605,6 +674,13 @@ namespace FourPanelComicMaker
                 return;
             }
             Process.Start(@".\使用说明.txt");
-        }   
+        }
+        #endregion
+
+        
+
+        
+
+        
     }
 }
