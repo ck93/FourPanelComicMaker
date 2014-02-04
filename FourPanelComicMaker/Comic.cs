@@ -86,6 +86,7 @@ namespace FourPanelComicMaker
             {
                 g.DrawImage(bubbleImg[bubbleType[i]], bubblePosition[i]);
             }
+            g.Dispose();
             return comicImg;
         }
         public Bitmap UpdateImage(Bitmap[] bubbleImg, int type, int x, int y, int width, int height)

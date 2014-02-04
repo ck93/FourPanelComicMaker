@@ -16,11 +16,14 @@ namespace FourPanelComicMaker
         public Form2(Bitmap img)
         {
             InitializeComponent();
-            resultImg = img;
-            pictureBox1.Height = pictureBox1.Width * img.Height / img.Width;
-            pictureBox1.Image = img;
-            button1.Location = new Point(button1.Location.X, pictureBox1.Height + 25);
-            this.Size = new Size(this.Size.Width, pictureBox1.Height + 110);
+            if (img.Height > 4000 || img.Width > 4000)
+                resultImg = new Bitmap(img, new Size(img.Width / 2, img.Height / 2));
+            else
+                resultImg = img;
+            int newHeight = pictureBox1.Width * img.Height / img.Width;
+            this.Size = new Size(this.Size.Width, newHeight + 110);
+            pictureBox1.Height = newHeight;
+            pictureBox1.Image = resultImg;
         }
 
         private void button1_Click(object sender, EventArgs e)

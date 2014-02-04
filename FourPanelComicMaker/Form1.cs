@@ -239,6 +239,10 @@ namespace FourPanelComicMaker
 
         void AddText()
         {
+            pictureBox1.Image.Dispose();
+            pictureBox2.Image.Dispose();
+            pictureBox3.Image.Dispose();
+            pictureBox4.Image.Dispose();
             pictureBox1.Image = comic1.DrawImage(bubbleImg);
             pictureBox2.Image = comic2.DrawImage(bubbleImg);
             pictureBox3.Image = comic3.DrawImage(bubbleImg);
@@ -335,29 +339,16 @@ namespace FourPanelComicMaker
             int point_Y = e.Y * picHeight / pictureBox1.Height;
             if (moveBubble)
             {
+                picBox.Image.Dispose();
                 picBox.Image = comic.UpdateImage(bubbleImg, movingBubble.bubbleType, point_X, point_Y, movingBubble.width, movingBubble.height);
             }
             else
             {
                 if (addMode != AddBubble.none)
-                    picBox.Image = comic.UpdateImage(bubbleImg, (int)addMode - 1, point_X, point_Y, bubbleWidth, bubbleHeight);
-                /*switch (addMode)
                 {
-                    case AddBubble.addBubble1:
-                        picBox.Image = comic.UpdateImage(bubbleImg, 0, point_X, point_Y, bubbleWidth, bubbleHeight);
-                        break;
-                    case AddBubble.addBubble2:
-                        picBox.Image = comic.UpdateImage(bubbleImg, 1, point_X, point_Y, bubbleWidth, bubbleHeight);
-                        break;
-                    case AddBubble.addBubble3:
-                        picBox.Image = comic.UpdateImage(bubbleImg, 2, point_X, point_Y, bubbleWidth, bubbleHeight);
-                        break;
-                    case AddBubble.addBubble4:
-                        picBox.Image = comic.UpdateImage(bubbleImg, 3, point_X, point_Y, bubbleWidth, bubbleHeight);
-                        break;
-                    default:
-                        break;
-                }*/
+                    picBox.Image.Dispose();
+                    picBox.Image = comic.UpdateImage(bubbleImg, (int)addMode - 1, point_X, point_Y, bubbleWidth, bubbleHeight);
+                }
             }
         }
 
@@ -401,30 +392,10 @@ namespace FourPanelComicMaker
                     {
                         comic.AddBubble(point_X, point_Y, bubbleWidth, bubbleHeight, (int)addMode - 1);
                         EnableTextBox(comic.numOfBubbles, tBox1, tBox2);
-                    }
-                    /*switch (addMode)
-                    {
-                        case AddBubble.addBubble1:
-                            comic.AddBubble(point_X, point_Y, bubbleWidth, bubbleHeight, 0);
-                            EnableTextBox(comic.numOfBubbles, tBox1, tBox2);
-                            break;
-                        case AddBubble.addBubble2:
-                            comic.AddBubble(point_X, point_Y, bubbleWidth, bubbleHeight, 1);
-                            EnableTextBox(comic.numOfBubbles, tBox1, tBox2);
-                            break;
-                        case AddBubble.addBubble3:
-                            comic.AddBubble(point_X, point_Y, bubbleWidth, bubbleHeight, 2);
-                            EnableTextBox(comic.numOfBubbles, tBox1, tBox2);
-                            break;
-                        case AddBubble.addBubble4:
-                            comic.AddBubble(point_X, point_Y, bubbleWidth, bubbleHeight, 3);
-                            EnableTextBox(comic.numOfBubbles, tBox1, tBox2);
-                            break;
-                        default:
-                            break;
-                    }*/
+                    }                   
                 }
             }
+            picBox.Image.Dispose();
             picBox.Image = comic.DrawImage(bubbleImg);
         }
 
@@ -465,6 +436,7 @@ namespace FourPanelComicMaker
                 }
                 comic.ChangeBubbleSize(bubbleIndex, (float)zoom / 20);
             }
+            picBox.Image.Dispose();
             picBox.Image = comic.DrawImage(bubbleImg);
         }
 
