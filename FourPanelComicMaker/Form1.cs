@@ -64,6 +64,19 @@ namespace FourPanelComicMaker
             f2.ShowDialog();
         }
 
+        void ResizePicBox()
+        {
+            int newHeight = pictureBox1.Width * picHeight / picWidth;
+            pictureBox1.Location = new Point(pictureBox1.Location.X, pictureBox1.Location.Y + (pictureBox1.Height - newHeight) / 2);
+            pictureBox2.Location = new Point(pictureBox2.Location.X, pictureBox2.Location.Y + (pictureBox2.Height - newHeight) / 2);
+            pictureBox3.Location = new Point(pictureBox3.Location.X, pictureBox3.Location.Y + (pictureBox3.Height - newHeight) / 2);
+            pictureBox4.Location = new Point(pictureBox4.Location.X, pictureBox4.Location.Y + (pictureBox4.Height - newHeight) / 2);
+            pictureBox1.Height = newHeight;
+            pictureBox2.Height = newHeight;
+            pictureBox3.Height = newHeight;
+            pictureBox4.Height = newHeight;            
+        }
+
         void ReadImg()
         {
             DirectoryInfo folder = new DirectoryInfo(filePath);
@@ -75,14 +88,30 @@ namespace FourPanelComicMaker
             fileNames.Clear();
             foreach (FileInfo file in folder.GetFiles("*.jpg"))
             {
-                fileNames.Add(file.FullName);
+                fileNames.Add(file.FullName);               
             }
-            picWidth = Image.FromFile(fileNames[0]).Width;
-            picHeight = Image.FromFile(fileNames[0]).Height;
             origin1 = Image.FromFile(fileNames[0]);
             origin2 = Image.FromFile(fileNames[1]);
             origin3 = Image.FromFile(fileNames[2]);
             origin4 = Image.FromFile(fileNames[3]);
+            picWidth = origin1.Width;
+            picHeight = origin1.Height;
+            if (origin2.Width != picWidth || origin2.Height != picHeight)
+            {
+                //sameSize[0] = true;
+                origin2 = ResizeImg(origin1, origin2);
+            }
+            if (origin3.Width != picWidth || origin3.Height != picHeight)
+            {
+                //sameSize[1] = true;
+                origin3 = ResizeImg(origin1, origin3);
+            }
+            if (origin4.Width != picWidth || origin4.Height != picHeight)
+            {
+                //sameSize[2] = true;
+                origin4 = ResizeImg(origin1, origin4);
+            }
+            ResizePicBox();
             pictureBox1.Image = origin1;
             pictureBox2.Image = origin2;
             pictureBox3.Image = origin3;
@@ -91,6 +120,15 @@ namespace FourPanelComicMaker
             comic2 = new Comic(origin2);
             comic3 = new Comic(origin3);
             comic4 = new Comic(origin4);        
+        }
+
+        Image ResizeImg(Image destImg, Image currentImg)
+        {
+            Image result = new Bitmap(destImg.Width, destImg.Height);
+            Graphics g = Graphics.FromImage(result);
+            g.DrawImage(currentImg, new Rectangle(0, 0, destImg.Width, destImg.Height), new Rectangle(0, 0, currentImg.Width, currentImg.Height), GraphicsUnit.Pixel);
+            g.Dispose();
+            return (Image)result;
         }
 
         private void DrawStringWrap(Graphics graphic, string text, Rectangle recangle, int bubbleType)

@@ -61,7 +61,7 @@
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(39, 20);
             this.label2.TabIndex = 2;
-            this.label2.Text = "1.0.0";
+            this.label2.Text = "1.0.1";
             // 
             // label3
             // 
@@ -81,7 +81,7 @@
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(79, 20);
             this.label4.TabIndex = 4;
-            this.label4.Text = "2014.02.03";
+            this.label4.Text = "2014.02.04";
             // 
             // label5
             // 

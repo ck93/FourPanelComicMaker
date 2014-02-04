@@ -17,7 +17,10 @@ namespace FourPanelComicMaker
         {
             InitializeComponent();
             resultImg = img;
+            pictureBox1.Height = pictureBox1.Width * img.Height / img.Width;
             pictureBox1.Image = img;
+            button1.Location = new Point(button1.Location.X, pictureBox1.Height + 25);
+            this.Size = new Size(this.Size.Width, pictureBox1.Height + 110);
         }
 
         private void button1_Click(object sender, EventArgs e)
