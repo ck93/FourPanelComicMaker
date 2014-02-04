@@ -13,7 +13,7 @@ namespace FourPanelComicMaker
 {
     enum AddBubble
     {
-        none, addBubble1, addBubble2
+        none, addBubble1, addBubble2, addBubble3, addBubble4
     }
     public partial class Form1 : Form
     {
@@ -39,9 +39,11 @@ namespace FourPanelComicMaker
         {
             InitializeComponent();
             ReadImg();           
-            bubbleImg = new Bitmap[2];
+            bubbleImg = new Bitmap[4];
             bubbleImg[0] = new Bitmap(Properties.Resources.bubble1);
             bubbleImg[1] = new Bitmap(Properties.Resources.bubble2);
+            bubbleImg[2] = new Bitmap(Properties.Resources.bubble3);
+            bubbleImg[3] = new Bitmap(Properties.Resources.bubble4);
             textBox1.Enabled = false;
             textBox2.Enabled = false;
             textBox3.Enabled = false;
@@ -95,21 +97,27 @@ namespace FourPanelComicMaker
         {
             float fontSize = 80;
             List<string> textRows;
-            int rowHeight, maxRowCount;
+            double rowHeight;
+            int maxRowCount;
             Font myFont;
             do
             {
-                //myFont = new Font("微软雅黑", fontSize, FontStyle.Regular, GraphicsUnit.Pixel);
                 myFont = new Font(myFontFamily, fontSize);
                 textRows = GetStringRows(graphic, myFont, text, recangle.Width * 3 / 4);
-                rowHeight = (int)(Math.Ceiling(graphic.MeasureString("测试", myFont).Height));
+                rowHeight = Math.Ceiling(graphic.MeasureString("测试", myFont).Height);
                 switch (bubbleType)
                 {
                     case 0:
-                        maxRowCount = recangle.Height * 5 / (rowHeight * 8);
+                        maxRowCount = (int)(recangle.Height * 5 / (rowHeight * 8));
                         break;
                     case 1:
-                        maxRowCount = recangle.Height * 3 / (rowHeight * 4);
+                        maxRowCount = (int)(recangle.Height * 3 / (rowHeight * 4));
+                        break;
+                    case 2:
+                        maxRowCount = (int)(recangle.Height * 3 / (rowHeight * 4));
+                        break;
+                    case 3:
+                        maxRowCount = (int)(recangle.Height * 3 / (rowHeight * 4));
                         break;
                     default:
                         maxRowCount = 1;
@@ -133,7 +141,17 @@ namespace FourPanelComicMaker
                         break;
                     case 1:
                         x = recangle.Left + recangle.Width / 6;
-                        y = recangle.Top + rowHeight / 4;
+                        y = recangle.Top + recangle.Height / 4;
+                        width = recangle.Width * 3 / 4;
+                        break;
+                    case 2:
+                        x = recangle.Left + recangle.Width / 7;
+                        y = recangle.Top + recangle.Height / 4;
+                        width = recangle.Width * 3 / 4;
+                        break;
+                    case 3:
+                        x = recangle.Left + recangle.Width / 9;
+                        y = recangle.Top + recangle.Height / 6;
                         width = recangle.Width * 3 / 4;
                         break;
                     default:
@@ -142,18 +160,11 @@ namespace FourPanelComicMaker
                         width = 0;
                         break;
                 }
-                Rectangle fontRectanle = new Rectangle(x, y + rowHeight * i, width, rowHeight);
+                Rectangle fontRectanle = new Rectangle(x, y + (int)(rowHeight * i), width, (int)rowHeight);
                 graphic.DrawString(textRows[i], myFont, new SolidBrush(Color.Black), fontRectanle, sf);
             }
         }
-        /// <summary>
-        /// 将文本分行
-        /// </summary>
-        /// <param name="graphic">绘图图面</param>
-        /// <param name="font">字体</param>
-        /// <param name="text">文本</param>
-        /// <param name="width">行宽</param>
-        /// <returns></returns>
+
         private List<string> GetStringRows(Graphics graphic, Font font, string text, int width)
         {
             int RowBeginIndex = 0;
@@ -269,6 +280,16 @@ namespace FourPanelComicMaker
             addMode = AddBubble.addBubble2;
         }
 
+        private void pictureBox7_Click(object sender, EventArgs e)
+        {
+            addMode = AddBubble.addBubble3;
+        }
+
+        private void pictureBox8_Click(object sender, EventArgs e)
+        {
+            addMode = AddBubble.addBubble4;
+        }
+
         #region 四幅图像的鼠标响应事件
         void MouseMoveAction(PictureBox picBox, Comic comic, MouseEventArgs e)
         {
@@ -280,7 +301,9 @@ namespace FourPanelComicMaker
             }
             else
             {
-                switch (addMode)
+                if (addMode != AddBubble.none)
+                    picBox.Image = comic.UpdateImage(bubbleImg, (int)addMode - 1, point_X, point_Y, bubbleWidth, bubbleHeight);
+                /*switch (addMode)
                 {
                     case AddBubble.addBubble1:
                         picBox.Image = comic.UpdateImage(bubbleImg, 0, point_X, point_Y, bubbleWidth, bubbleHeight);
@@ -288,9 +311,15 @@ namespace FourPanelComicMaker
                     case AddBubble.addBubble2:
                         picBox.Image = comic.UpdateImage(bubbleImg, 1, point_X, point_Y, bubbleWidth, bubbleHeight);
                         break;
+                    case AddBubble.addBubble3:
+                        picBox.Image = comic.UpdateImage(bubbleImg, 2, point_X, point_Y, bubbleWidth, bubbleHeight);
+                        break;
+                    case AddBubble.addBubble4:
+                        picBox.Image = comic.UpdateImage(bubbleImg, 3, point_X, point_Y, bubbleWidth, bubbleHeight);
+                        break;
                     default:
                         break;
-                }
+                }*/
             }
         }
 
@@ -330,7 +359,12 @@ namespace FourPanelComicMaker
                 }
                 else
                 {
-                    switch (addMode)
+                    if (addMode != AddBubble.none)
+                    {
+                        comic.AddBubble(point_X, point_Y, bubbleWidth, bubbleHeight, (int)addMode - 1);
+                        EnableTextBox(comic.numOfBubbles, tBox1, tBox2);
+                    }
+                    /*switch (addMode)
                     {
                         case AddBubble.addBubble1:
                             comic.AddBubble(point_X, point_Y, bubbleWidth, bubbleHeight, 0);
@@ -340,9 +374,17 @@ namespace FourPanelComicMaker
                             comic.AddBubble(point_X, point_Y, bubbleWidth, bubbleHeight, 1);
                             EnableTextBox(comic.numOfBubbles, tBox1, tBox2);
                             break;
+                        case AddBubble.addBubble3:
+                            comic.AddBubble(point_X, point_Y, bubbleWidth, bubbleHeight, 2);
+                            EnableTextBox(comic.numOfBubbles, tBox1, tBox2);
+                            break;
+                        case AddBubble.addBubble4:
+                            comic.AddBubble(point_X, point_Y, bubbleWidth, bubbleHeight, 3);
+                            EnableTextBox(comic.numOfBubbles, tBox1, tBox2);
+                            break;
                         default:
                             break;
-                    }
+                    }*/
                 }
             }
             picBox.Image = comic.DrawImage(bubbleImg);
@@ -553,6 +595,6 @@ namespace FourPanelComicMaker
                 return;
             }
             Process.Start(@".\使用说明.txt");
-        }
+        }   
     }
 }
