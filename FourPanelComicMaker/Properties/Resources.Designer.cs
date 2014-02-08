@@ -143,9 +143,39 @@ namespace FourPanelComicMaker.Properties {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
+        internal static System.Drawing.Bitmap bubble5 {
+            get {
+                object obj = ResourceManager.GetObject("bubble5", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap 右箭头 {
+            get {
+                object obj = ResourceManager.GetObject("右箭头", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
         internal static System.Drawing.Bitmap 四格漫画logo {
             get {
                 object obj = ResourceManager.GetObject("四格漫画logo", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap 左箭头 {
+            get {
+                object obj = ResourceManager.GetObject("左箭头", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

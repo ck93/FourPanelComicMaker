@@ -40,9 +40,19 @@ namespace FourPanelComicMaker
         private void button2_Click(object sender, EventArgs e)
         {
             Form1.borderWidth = (int)numericUpDown1.Value;
+            Form1.borderColor = tempColor;
             Form1.myFontFamily = temp;
             Form1.sign = textBox2.Text;
+            SaveConfig();
             this.Close();
+        }
+
+        private void SaveConfig()
+        {
+            ConfigClass.SetValue("borderWidth", numericUpDown1.Value.ToString());
+            ConfigClass.SetValue("borderColor", tempColor.ToArgb().ToString());
+            ConfigClass.SetValue("font", textBox1.Text);
+            ConfigClass.SetValue("sign", textBox2.Text);
         }
 
         private void button3_Click(object sender, EventArgs e)

@@ -8,43 +8,50 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
+using System.Threading;
+using System.Configuration;
+//using System.Windows.Media;
 
 namespace FourPanelComicMaker
 {
     enum AddBubble
     {
-        none, addBubble1, addBubble2, addBubble3, addBubble4
+        none, addBubble1, addBubble2, addBubble3, addBubble4, addBubble5
     }
     public partial class Form1 : Form
     {
         int picWidth = 500;
         int picHeight = 666;
-        int bubbleWidth = 210;
-        int bubbleHeight = 180;
-        static public int borderWidth = 10;
-        static public Color borderColor = Color.White;
-        static public FontFamily myFontFamily = new FontFamily("微软雅黑");
-        static public string sign = "Designed by";
+        int bubbleWidth, bubbleHeight;
+        static public int borderWidth;
+        static public Color borderColor;
+        static public FontFamily myFontFamily;
+        static public string sign;
         Comic comic1, comic2, comic3, comic4;
-        Bitmap[] bubbleImg;
+        static public Bitmap[] bubbleImg;
+        static public Rectangle[] textRegion = new Rectangle[5] { new Rectangle(43, 49, 126, 94), new Rectangle(35, 39, 134, 102),
+           new Rectangle(37, 40, 117, 86), new Rectangle(22, 33, 164, 96), new Rectangle(24, 22, 116, 61)};
+        int[] textOriginWidth = new int[5] {126, 134, 117, 164, 116};
         string filePath = @".\photo\";
         List<string> fileNames = new List<string>();
         Bitmap final;
-        Image origin1, origin2, origin3, origin4;
-        
+        Image origin1, origin2, origin3, origin4;        
         AddBubble addMode = AddBubble.none;
         bool moveBubble = false;
         Bubble movingBubble = new Bubble();
+        
 
         public Form1()
         {
             InitializeComponent();
-            ReadImg();           
-            bubbleImg = new Bitmap[4];
+            ReadImg();
+            ReadConfig();
+            bubbleImg = new Bitmap[5];
             bubbleImg[0] = new Bitmap(Properties.Resources.bubble1);
             bubbleImg[1] = new Bitmap(Properties.Resources.bubble2);
             bubbleImg[2] = new Bitmap(Properties.Resources.bubble3);
             bubbleImg[3] = new Bitmap(Properties.Resources.bubble4);
+            bubbleImg[4] = new Bitmap(Properties.Resources.bubble5);
             textBox1.Enabled = false;
             textBox2.Enabled = false;
             textBox3.Enabled = false;
@@ -55,6 +62,15 @@ namespace FourPanelComicMaker
             textBox8.Enabled = false;
             if (!Directory.Exists(@".\data"))
                 Directory.CreateDirectory(@".\data");
+            timer1.Start();           
+        }
+
+        private void ReadConfig()
+        {
+            borderWidth = Convert.ToInt32(ConfigClass.GetValue("borderWidth"));
+            borderColor = Color.FromArgb(Convert.ToInt32(ConfigClass.GetValue("borderColor")));
+            myFontFamily = new FontFamily(ConfigClass.GetValue("font"));
+            sign = ConfigClass.GetValue("sign");
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -99,17 +115,14 @@ namespace FourPanelComicMaker
             picHeight = origin1.Height;
             if (origin2.Width != picWidth || origin2.Height != picHeight)
             {
-                //sameSize[0] = true;
                 origin2 = ResizeImg(origin1, origin2);
             }
             if (origin3.Width != picWidth || origin3.Height != picHeight)
             {
-                //sameSize[1] = true;
                 origin3 = ResizeImg(origin1, origin3);
             }
             if (origin4.Width != picWidth || origin4.Height != picHeight)
             {
-                //sameSize[2] = true;
                 origin4 = ResizeImg(origin1, origin4);
             }
             ResizePicBox();
@@ -130,113 +143,7 @@ namespace FourPanelComicMaker
             g.DrawImage(currentImg, new Rectangle(0, 0, destImg.Width, destImg.Height), new Rectangle(0, 0, currentImg.Width, currentImg.Height), GraphicsUnit.Pixel);
             g.Dispose();
             return (Image)result;
-        }
-
-        private void DrawStringWrap(Graphics g, string text, Rectangle recangle, int bubbleType)
-        {
-            float fontSize = 80;
-            List<string> textRows;
-            double rowHeight;
-            int maxRowCount;
-            Font myFont;
-            do
-            {
-                myFont = new Font(myFontFamily, fontSize);
-                textRows = GetStringRows(g, myFont, text, recangle.Width * 2 / 3);
-                rowHeight = Math.Ceiling(g.MeasureString("测试", myFont).Height);
-                switch (bubbleType)
-                {
-                    case 0:
-                        maxRowCount = (int)(recangle.Height * 5 / (rowHeight * 8));
-                        break;
-                    case 1:
-                        maxRowCount = (int)(recangle.Height * 3 / (rowHeight * 4));
-                        break;
-                    case 2:
-                        maxRowCount = (int)(recangle.Height * 3 / (rowHeight * 4));
-                        break;
-                    case 3:
-                        maxRowCount = (int)(recangle.Height * 3 / (rowHeight * 4));
-                        break;
-                    default:
-                        maxRowCount = 1;
-                        break;
-                }                
-                fontSize -= 2;
-            } while (maxRowCount < textRows.Count);
-            int drawRowCount = (maxRowCount < textRows.Count) ? maxRowCount : textRows.Count;
-            StringFormat sf = new StringFormat();
-            sf.Alignment = StringAlignment.Near;
-            sf.LineAlignment = StringAlignment.Center;
-            for (int i = 0; i < drawRowCount; i++)
-            {
-                int x, y, width;
-                switch (bubbleType)
-                {
-                    case 0:
-                        x = recangle.Left + recangle.Width / 6;
-                        y = recangle.Top + recangle.Height / 4;
-                        width = recangle.Width * 3 / 4;
-                        break;
-                    case 1:
-                        x = recangle.Left + recangle.Width / 6;
-                        y = recangle.Top + recangle.Height / 4;
-                        width = recangle.Width * 3 / 4;
-                        break;
-                    case 2:
-                        x = recangle.Left + recangle.Width / 7;
-                        y = recangle.Top + recangle.Height / 5;
-                        width = recangle.Width * 3 / 4;
-                        break;
-                    case 3:
-                        x = recangle.Left + recangle.Width / 9;
-                        y = recangle.Top + recangle.Height / 6;
-                        width = recangle.Width * 3 / 4;
-                        break;
-                    default:
-                        x = 0;
-                        y = 0;
-                        width = 0;
-                        break;
-                }
-                Rectangle fontRectanle = new Rectangle(x, y + (int)(rowHeight * i), width, (int)rowHeight);
-                g.DrawString(textRows[i], myFont, new SolidBrush(Color.Black), fontRectanle, sf);
-            }
-        }
-
-        private List<string> GetStringRows(Graphics graphic, Font font, string text, int width)
-        {
-            int RowBeginIndex = 0;
-            int rowEndIndex = 0;
-            int textLength = text.Length;
-            List<string> textRows = new List<string>();
-            for (int index = 0; index < textLength; index++)
-            {
-                rowEndIndex = index;
-                if (index == textLength - 1)
-                {
-                    if (graphic.MeasureString(text.Substring(RowBeginIndex), font).Width <= width)
-                        textRows.Add(text.Substring(RowBeginIndex));
-                    else
-                    {
-                        textRows.Add(text.Substring(RowBeginIndex, rowEndIndex - RowBeginIndex));
-                        textRows.Add(text.Substring(rowEndIndex));
-                    }
-                }
-                else if (rowEndIndex + 1 < text.Length && text.Substring(rowEndIndex, 2) == "\r\n")
-                {
-                    textRows.Add(text.Substring(RowBeginIndex, rowEndIndex - RowBeginIndex));
-                    rowEndIndex = index += 2;
-                    RowBeginIndex = rowEndIndex;
-                }
-                else if (graphic.MeasureString(text.Substring(RowBeginIndex, rowEndIndex - RowBeginIndex + 1), font).Width > width)
-                {
-                    textRows.Add(text.Substring(RowBeginIndex, rowEndIndex - RowBeginIndex));
-                    RowBeginIndex = rowEndIndex;
-                }
-            }
-            return textRows;
-        }
+        }      
 
         void AddText()
         {
@@ -251,30 +158,30 @@ namespace FourPanelComicMaker
             Graphics g = Graphics.FromImage(pictureBox1.Image);
             if (comic1.numOfBubbles > 0)
             {
-                DrawStringWrap(g, textBox1.Text, comic1.GetPosition(0), comic1.GetType(0));
+                comic1.DrawStringWrap(g, textBox1.Text, 0);
                 if (comic1.numOfBubbles > 1)
-                    DrawStringWrap(g, textBox2.Text, comic1.GetPosition(1), comic1.GetType(1));
+                    comic1.DrawStringWrap(g, textBox2.Text, 1);
             }
             g = Graphics.FromImage(pictureBox2.Image);
             if (comic2.numOfBubbles > 0)
             {
-                DrawStringWrap(g, textBox3.Text, comic2.GetPosition(0), comic2.GetType(0));
+                comic2.DrawStringWrap(g, textBox3.Text, 0);
                 if (comic2.numOfBubbles > 1)
-                    DrawStringWrap(g, textBox4.Text, comic2.GetPosition(1), comic2.GetType(1));
+                    comic2.DrawStringWrap(g, textBox4.Text, 1);
             }
             g = Graphics.FromImage(pictureBox3.Image);
             if (comic3.numOfBubbles > 0)
             {
-                DrawStringWrap(g, textBox5.Text, comic3.GetPosition(0), comic3.GetType(0));
+                comic3.DrawStringWrap(g, textBox5.Text, 0);
                 if (comic3.numOfBubbles > 1)
-                    DrawStringWrap(g, textBox6.Text, comic3.GetPosition(1), comic3.GetType(1));
+                    comic3.DrawStringWrap(g, textBox6.Text, 1);
             }
             g = Graphics.FromImage(pictureBox4.Image);
             if (comic4.numOfBubbles > 0)
             {
-                DrawStringWrap(g, textBox7.Text, comic4.GetPosition(0), comic4.GetType(0));
+                comic4.DrawStringWrap(g, textBox7.Text, 0);
                 if (comic4.numOfBubbles > 1)
-                    DrawStringWrap(g, textBox8.Text, comic4.GetPosition(1), comic4.GetType(1));
+                    comic4.DrawStringWrap(g, textBox8.Text, 1);
             }
             g.Dispose();
         }
@@ -323,9 +230,9 @@ namespace FourPanelComicMaker
             Graphics g = Graphics.FromImage(picBox.Image);
             if (comic.numOfBubbles > 0)
             {
-                DrawStringWrap(g, textBox1.Text, comic.GetPosition(0), comic.GetType(0));
+                comic.DrawStringWrap(g, textBox1.Text, 0);
                 if (comic.numOfBubbles > 1)
-                    DrawStringWrap(g, textBox2.Text, comic.GetPosition(1), comic.GetType(1));
+                    comic.DrawStringWrap(g, textBox2.Text, 1);
             }
         }
         void Text2ChangedAction(TextBox textBox1, TextBox textBox2, PictureBox picBox, Comic comic)
@@ -333,8 +240,8 @@ namespace FourPanelComicMaker
             picBox.Image.Dispose();
             picBox.Image = comic.DrawImage(bubbleImg);
             Graphics g = Graphics.FromImage(picBox.Image);
-            DrawStringWrap(g, textBox1.Text, comic.GetPosition(0), comic.GetType(0));
-            DrawStringWrap(g, textBox2.Text, comic.GetPosition(1), comic.GetType(1));
+            comic.DrawStringWrap(g, textBox1.Text, 0);
+            comic.DrawStringWrap(g, textBox2.Text, 1);
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
@@ -376,26 +283,43 @@ namespace FourPanelComicMaker
         {
             Text2ChangedAction(textBox7, textBox8, pictureBox4, comic4);
         }
+
         #region 选择气泡
         private void pictureBox5_Click(object sender, EventArgs e)
         {
             addMode = AddBubble.addBubble1;
+            bubbleWidth = bubbleImg[0].Width;
+            bubbleHeight = bubbleImg[0].Height;
         }
 
         private void pictureBox6_Click(object sender, EventArgs e)
         {
             addMode = AddBubble.addBubble2;
+            bubbleWidth = bubbleImg[1].Width;
+            bubbleHeight = bubbleImg[1].Height;
         }
 
         private void pictureBox7_Click(object sender, EventArgs e)
         {
             addMode = AddBubble.addBubble3;
+            bubbleWidth = bubbleImg[2].Width;
+            bubbleHeight = bubbleImg[2].Height;
         }
 
         private void pictureBox8_Click(object sender, EventArgs e)
         {
             addMode = AddBubble.addBubble4;
+            bubbleWidth = bubbleImg[3].Width;
+            bubbleHeight = bubbleImg[3].Height;
         }
+
+        private void pictureBox9_Click(object sender, EventArgs e)
+        {
+            addMode = AddBubble.addBubble5;
+            bubbleWidth = bubbleImg[4].Width;
+            bubbleHeight = bubbleImg[4].Height;
+        }
+
         #endregion
 
         #region 四幅图像的鼠标响应事件
@@ -449,8 +373,12 @@ namespace FourPanelComicMaker
                 {
                     comic.AddBubble(point_X, point_Y, movingBubble.width, movingBubble.height, movingBubble.bubbleType);
                     EnableTextBox(comic.numOfBubbles, tBox1, tBox2);
+                    picBox.Image.Dispose();
+                    picBox.Image = comic.DrawImage(bubbleImg);
+                    Text1ChangedAction(tBox1, tBox2, picBox, comic);
                     moveBubble = false;
                     addMode = AddBubble.none;
+                    return;
                 }
                 else
                 {
@@ -463,26 +391,7 @@ namespace FourPanelComicMaker
             }
             picBox.Image.Dispose();
             picBox.Image = comic.DrawImage(bubbleImg);
-        }
-
-        void EnableTextBox(int num, TextBox tBox1, TextBox tBox2)
-        {
-            switch(num)
-            {
-                case 0:
-                    //tBox1.Text = "";
-                    tBox1.Enabled = false;                    
-                    break;
-                case 1:
-                    tBox1.Enabled = true;
-                    //tBox2.Text = "";
-                    tBox2.Enabled = false;
-                    break;
-                case 2:
-                    tBox2.Enabled = true;
-                    break;
-            }
-        }
+        }       
 
         void MouseWheelAction(PictureBox picBox, Comic comic, MouseEventArgs e)
         {
@@ -518,6 +427,25 @@ namespace FourPanelComicMaker
             }
         }
 
+        void EnableTextBox(int num, TextBox tBox1, TextBox tBox2)
+        {
+            switch (num)
+            {
+                case 0:
+                    //tBox1.Text = "";
+                    tBox1.Enabled = false;
+                    break;
+                case 1:
+                    tBox1.Enabled = true;
+                    //tBox2.Text = "";
+                    tBox2.Enabled = false;
+                    break;
+                case 2:
+                    tBox2.Enabled = true;
+                    break;
+            }
+        }
+
         private void pictureBox1_MouseEnter(object sender, EventArgs e)
         {
             pictureBox1.Focus();
@@ -541,6 +469,7 @@ namespace FourPanelComicMaker
         private void pictureBox1_MouseWheel(object sender, MouseEventArgs e)
         {
             MouseWheelAction(pictureBox1, comic1, e);
+            textBox1_TextChanged(sender, e);
         }
 
         private void pictureBox1_MouseLeave(object sender, EventArgs e)
@@ -571,6 +500,7 @@ namespace FourPanelComicMaker
         private void pictureBox2_MouseWheel(object sender, MouseEventArgs e)
         {
             MouseWheelAction(pictureBox2, comic2, e);
+            textBox3_TextChanged(sender, e);
         }
 
         private void pictureBox2_MouseLeave(object sender, EventArgs e)
@@ -601,6 +531,7 @@ namespace FourPanelComicMaker
         private void pictureBox3_MouseWheel(object sender, MouseEventArgs e)
         {
             MouseWheelAction(pictureBox3, comic3, e);
+            textBox5_TextChanged(sender, e);
         }
 
         private void pictureBox3_MouseLeave(object sender, EventArgs e)
@@ -631,6 +562,7 @@ namespace FourPanelComicMaker
         private void pictureBox4_MouseWheel(object sender, MouseEventArgs e)
         {
             MouseWheelAction(pictureBox4, comic4, e);
+            textBox7_TextChanged(sender, e);
         }
 
         private void pictureBox4_MouseLeave(object sender, EventArgs e)
@@ -668,19 +600,20 @@ namespace FourPanelComicMaker
 
         private void shiyoToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (!File.Exists(@".\使用说明.txt"))
-            {
-                MessageBox.Show("文件缺失，请自行下载使用说明！");
-                return;
-            }
-            Process.Start(@".\使用说明.txt");
+            Tutorial tutorial = new Tutorial();
+            tutorial.ShowDialog();
         }
-        #endregion
+        #endregion       
 
-        
-
-        
-
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            if (ConfigClass.GetValue("ShowTutorial") == "Yes")
+            {
+                Tutorial tutorial = new Tutorial();
+                timer1.Dispose();
+                tutorial.ShowDialog();
+            }
+        }
         
     }
 }
