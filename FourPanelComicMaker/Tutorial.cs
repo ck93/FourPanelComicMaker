@@ -14,7 +14,9 @@ namespace FourPanelComicMaker
     {
         int index = 0;
         Point mousePoint = new Point();
-        Font myFont = new Font("微软雅黑", 10.5f);
+        Font myFont = new Font("微软雅黑", 3.5f);
+        Image origin = new Bitmap(Properties.Resources.resPath + "tutorial_center.jpg");
+        Bitmap picBoard;
         int split = 450;
         int direction;
 
@@ -23,6 +25,9 @@ namespace FourPanelComicMaker
         public Tutorial()
         {
             InitializeComponent();
+            this.BackgroundImage = new Bitmap(Properties.Resources.resPath + "tutorial.jpg");
+            picBoard = (Bitmap)origin.Clone();
+            pictureBox3.Image = picBoard;
             if (ConfigClass.GetValue("ShowTutorial") == "Yes")
                 checkBox1.Checked = true;
             else
@@ -92,8 +97,8 @@ namespace FourPanelComicMaker
 
         void DrawSlide()
         {
-            Graphics g = panel1.CreateGraphics();
-            g.Clear(Color.FromKnownColor(KnownColor.Control));
+            picBoard = (Bitmap)origin.Clone();
+            Graphics g = Graphics.FromImage(picBoard);
             Rectangle rect1 = new Rectangle(split - 450, 0, 450, 165);
             Rectangle rect2 = new Rectangle(split, 0, 450, 165);
             StringFormat stringFormat = new StringFormat();
@@ -110,18 +115,22 @@ namespace FourPanelComicMaker
                 g.DrawString(tips[index + 1], myFont, Brushes.Black, rect2, stringFormat);
             }
             g.Dispose();
+            pictureBox3.Image.Dispose();
+            pictureBox3.Image = picBoard;
         }
 
         public void DrawTip()
         {
-            Graphics g = panel1.CreateGraphics();
-            g.Clear(Color.FromKnownColor(KnownColor.Control));
+            picBoard = (Bitmap)origin.Clone();
+            Graphics g = Graphics.FromImage(picBoard);
             Rectangle rect = new Rectangle(0, 0, 450, 165);
             StringFormat stringFormat = new StringFormat();
             stringFormat.Alignment = StringAlignment.Center;
             stringFormat.LineAlignment = StringAlignment.Center;            
             g.DrawString(tips[index], myFont, Brushes.Black, rect, stringFormat);                
             g.Dispose();
+            pictureBox3.Image.Dispose();
+            pictureBox3.Image = picBoard;
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -163,5 +172,6 @@ namespace FourPanelComicMaker
             else
                 ConfigClass.SetValue("ShowTutorial", "No");
         }
+
     }
 }

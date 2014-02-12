@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FourPanelComicMaker", "FourPanelComicMaker\FourPanelComicMaker.csproj", "{7A1CF22A-94D0-4A03-904E-13AAAA122D64}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PicCutter", "PicCutter\PicCutter.csproj", "{269B66FD-3681-4078-9D30-624D034A55D5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -13,6 +15,10 @@ Global
 		{7A1CF22A-94D0-4A03-904E-13AAAA122D64}.Debug|x86.Build.0 = Debug|x86
 		{7A1CF22A-94D0-4A03-904E-13AAAA122D64}.Release|x86.ActiveCfg = Release|x86
 		{7A1CF22A-94D0-4A03-904E-13AAAA122D64}.Release|x86.Build.0 = Release|x86
+		{269B66FD-3681-4078-9D30-624D034A55D5}.Debug|x86.ActiveCfg = Debug|x86
+		{269B66FD-3681-4078-9D30-624D034A55D5}.Debug|x86.Build.0 = Debug|x86
+		{269B66FD-3681-4078-9D30-624D034A55D5}.Release|x86.ActiveCfg = Release|x86
+		{269B66FD-3681-4078-9D30-624D034A55D5}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

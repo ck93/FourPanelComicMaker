@@ -10,7 +10,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Threading;
 using System.Configuration;
-//using System.Windows.Media;
+using System.Net;
 
 namespace FourPanelComicMaker
 {
@@ -29,40 +29,33 @@ namespace FourPanelComicMaker
         static public string sign;
         Comic comic1, comic2, comic3, comic4;
         static public Bitmap[] bubbleImg;
-        static public Rectangle[] textRegion = new Rectangle[5] { new Rectangle(43, 49, 126, 94), new Rectangle(35, 39, 134, 102),
-           new Rectangle(37, 40, 117, 86), new Rectangle(22, 33, 164, 96), new Rectangle(24, 22, 116, 61)};
+        static public Rectangle[] textRegion = new Rectangle[10] { new Rectangle(43, 49, 126, 94), new Rectangle(35, 39, 134, 102),
+           new Rectangle(37, 40, 117, 86), new Rectangle(22, 33, 164, 96), new Rectangle(24, 22, 116, 61), new Rectangle(27, 26, 130, 76),
+            new Rectangle(30, 34, 152, 101), new Rectangle(29, 22, 152, 63), new Rectangle(35, 14, 141, 143), new Rectangle(25, 32, 158, 119)};
         int[] textOriginWidth = new int[5] {126, 134, 117, 164, 116};
-        string filePath = @".\photo\";
+        string filePath = @".\Photo\";
         List<string> fileNames = new List<string>();
         Bitmap final;
-        Image origin1, origin2, origin3, origin4;        
+        Image[] origin = new Image[4];
         AddBubble addMode = AddBubble.none;
         bool moveBubble = false;
         Bubble movingBubble = new Bubble();
-        
+        string version = "1.2.2";
 
         public Form1()
         {
             InitializeComponent();
             ReadImg();
             ReadConfig();
-            bubbleImg = new Bitmap[5];
-            bubbleImg[0] = new Bitmap(Properties.Resources.bubble1);
-            bubbleImg[1] = new Bitmap(Properties.Resources.bubble2);
-            bubbleImg[2] = new Bitmap(Properties.Resources.bubble3);
-            bubbleImg[3] = new Bitmap(Properties.Resources.bubble4);
-            bubbleImg[4] = new Bitmap(Properties.Resources.bubble5);
-            textBox1.Enabled = false;
-            textBox2.Enabled = false;
-            textBox3.Enabled = false;
-            textBox4.Enabled = false;
-            textBox5.Enabled = false;
-            textBox6.Enabled = false;
-            textBox7.Enabled = false;
-            textBox8.Enabled = false;
-            if (!Directory.Exists(@".\data"))
-                Directory.CreateDirectory(@".\data");
-            timer1.Start();           
+            LoadImg();            
+            if (!Directory.Exists(@".\Output"))
+                Directory.CreateDirectory(@".\Output");
+            this.BackgroundImage = new Bitmap(Properties.Resources.resPath + "1.jpg");
+            menuStrip1.BackgroundImage = new Bitmap(Properties.Resources.resPath + "menuStrip.jpg");
+            panel1.Region = new System.Drawing.Region();
+            timer1.Start();
+            Thread checkUpdate = new Thread(CheckUpdate);
+            checkUpdate.Start();
         }
 
         private void ReadConfig()
@@ -71,6 +64,40 @@ namespace FourPanelComicMaker
             borderColor = Color.FromArgb(Convert.ToInt32(ConfigClass.GetValue("borderColor")));
             myFontFamily = new FontFamily(ConfigClass.GetValue("font"));
             sign = ConfigClass.GetValue("sign");
+        }
+
+        private void LoadImg()
+        {
+            bubbleImg = new Bitmap[10];
+            bubbleImg[0] = BubbleRes.bubble1;
+            bubbleImg[1] = BubbleRes.bubble2;
+            bubbleImg[2] = BubbleRes.bubble3;
+            bubbleImg[3] = BubbleRes.bubble4;
+            bubbleImg[4] = BubbleRes.bubble5;
+            bubbleImg[5] = BubbleRes.bubble6;
+            bubbleImg[6] = BubbleRes.bubble7;
+            bubbleImg[7] = BubbleRes.bubble8;
+            bubbleImg[8] = BubbleRes.bubble9;
+            bubbleImg[9] = BubbleRes.bubble10;
+            foreach (PictureBox pictureBox in panel5.Controls)
+            {
+                for (int i = 5; i < 15; i++)
+                {
+                    if (pictureBox.Name == "pictureBox" + i)
+                        pictureBox.Image = bubbleImg[i - 5];
+                }
+            }
+            foreach (Control control in this.Controls)
+            {
+                if (control is Panel)
+                {
+                    foreach (Control textBox in control.Controls)
+                    {
+                        if (textBox is TextBox)
+                            textBox.Enabled = false;
+                    }
+                }
+            }
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -107,33 +134,28 @@ namespace FourPanelComicMaker
             {
                 fileNames.Add(file.FullName);               
             }
-            origin1 = Image.FromFile(fileNames[0]);
-            origin2 = Image.FromFile(fileNames[1]);
-            origin3 = Image.FromFile(fileNames[2]);
-            origin4 = Image.FromFile(fileNames[3]);
-            picWidth = origin1.Width;
-            picHeight = origin1.Height;
-            if (origin2.Width != picWidth || origin2.Height != picHeight)
+            for (int i = 0; i < 4; i++)
             {
-                origin2 = ResizeImg(origin1, origin2);
+                origin[i] = Image.FromFile(fileNames[i]);
             }
-            if (origin3.Width != picWidth || origin3.Height != picHeight)
+            picWidth = origin[0].Width;
+            picHeight = origin[0].Height;
+            for (int i = 1; i < 4; i++)
             {
-                origin3 = ResizeImg(origin1, origin3);
-            }
-            if (origin4.Width != picWidth || origin4.Height != picHeight)
-            {
-                origin4 = ResizeImg(origin1, origin4);
-            }
+                if (origin[i].Width != picWidth || origin[i].Height != picHeight)
+                {
+                    origin[i] = ResizeImg(origin[0], origin[i]);
+                }
+            }            
             ResizePicBox();
-            pictureBox1.Image = origin1;
-            pictureBox2.Image = origin2;
-            pictureBox3.Image = origin3;
-            pictureBox4.Image = origin4;
-            comic1 = new Comic(origin1);
-            comic2 = new Comic(origin2);
-            comic3 = new Comic(origin3);
-            comic4 = new Comic(origin4);        
+            pictureBox1.Image = origin[0];
+            pictureBox2.Image = origin[1];
+            pictureBox3.Image = origin[2];
+            pictureBox4.Image = origin[3];
+            comic1 = new Comic(origin[0]);
+            comic2 = new Comic(origin[1]);
+            comic3 = new Comic(origin[2]);
+            comic4 = new Comic(origin[3]);        
         }
 
         Image ResizeImg(Image destImg, Image currentImg)
@@ -285,41 +307,61 @@ namespace FourPanelComicMaker
         }
 
         #region 选择气泡
+        private void ChooseBubble(int index)
+        {
+            addMode = (AddBubble)index;
+            bubbleWidth = bubbleImg[index - 1].Width;
+            bubbleHeight = bubbleImg[index - 1].Height;
+        }
         private void pictureBox5_Click(object sender, EventArgs e)
         {
-            addMode = AddBubble.addBubble1;
-            bubbleWidth = bubbleImg[0].Width;
-            bubbleHeight = bubbleImg[0].Height;
+            ChooseBubble(1);
         }
 
         private void pictureBox6_Click(object sender, EventArgs e)
         {
-            addMode = AddBubble.addBubble2;
-            bubbleWidth = bubbleImg[1].Width;
-            bubbleHeight = bubbleImg[1].Height;
+            ChooseBubble(2);
         }
 
         private void pictureBox7_Click(object sender, EventArgs e)
         {
-            addMode = AddBubble.addBubble3;
-            bubbleWidth = bubbleImg[2].Width;
-            bubbleHeight = bubbleImg[2].Height;
+            ChooseBubble(3);
         }
 
         private void pictureBox8_Click(object sender, EventArgs e)
         {
-            addMode = AddBubble.addBubble4;
-            bubbleWidth = bubbleImg[3].Width;
-            bubbleHeight = bubbleImg[3].Height;
+            ChooseBubble(4);
         }
 
         private void pictureBox9_Click(object sender, EventArgs e)
         {
-            addMode = AddBubble.addBubble5;
-            bubbleWidth = bubbleImg[4].Width;
-            bubbleHeight = bubbleImg[4].Height;
+            ChooseBubble(5);
         }
 
+        private void pictureBox10_Click(object sender, EventArgs e)
+        {
+            ChooseBubble(6);
+        }
+
+        private void pictureBox11_Click(object sender, EventArgs e)
+        {
+            ChooseBubble(7);
+        }
+
+        private void pictureBox12_Click(object sender, EventArgs e)
+        {
+            ChooseBubble(8);
+        }
+
+        private void pictureBox13_Click(object sender, EventArgs e)
+        {
+            ChooseBubble(9);
+        }
+
+        private void pictureBox14_Click(object sender, EventArgs e)
+        {
+            ChooseBubble(10);
+        }
         #endregion
 
         #region 四幅图像的鼠标响应事件
@@ -432,12 +474,10 @@ namespace FourPanelComicMaker
             switch (num)
             {
                 case 0:
-                    //tBox1.Text = "";
                     tBox1.Enabled = false;
                     break;
                 case 1:
                     tBox1.Enabled = true;
-                    //tBox2.Text = "";
                     tBox2.Enabled = false;
                     break;
                 case 2:
@@ -593,6 +633,11 @@ namespace FourPanelComicMaker
             settings.ShowDialog();
         }
 
+        private void 图片裁剪器ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Process.Start(@".\PicCutter.exe");
+        }
+
         private void 退出ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Application.Exit();
@@ -602,6 +647,30 @@ namespace FourPanelComicMaker
         {
             Tutorial tutorial = new Tutorial();
             tutorial.ShowDialog();
+        }
+
+        private void 检查更新ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                WebClient MyWebClient = new WebClient();
+                Byte[] pageData = MyWebClient.DownloadData("http://yunpan.cn/QpWVKiaXbE4Pm");
+                string pageHtml = Encoding.UTF8.GetString(pageData);
+                string version = pageHtml.Substring(pageHtml.IndexOf(".txt") - 5, 5);
+                if (version != this.version)
+                {
+                    if (MessageBox.Show("检查到新版本！当前版本为" + this.version + "，最新版本为" + version + "!", "检查更新", MessageBoxButtons.OKCancel, MessageBoxIcon.Information) == DialogResult.OK)
+                        Process.Start("http://pan.baidu.com/s/1sjGsFnR");
+                }
+                else
+                {
+                    MessageBox.Show("当前为最新版本！", "检查更新", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch
+            {
+                MessageBox.Show("检查更新失败！请检查网络连接是否正常！", "检查更新",MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
         #endregion       
 
@@ -614,6 +683,25 @@ namespace FourPanelComicMaker
                 tutorial.ShowDialog();
             }
         }
-        
+
+        void CheckUpdate()
+        {
+            try
+            {
+                WebClient MyWebClient = new WebClient();
+                Byte[] pageData = MyWebClient.DownloadData("http://yunpan.cn/QpWVKiaXbE4Pm");
+                string pageHtml = Encoding.UTF8.GetString(pageData);
+                string version = pageHtml.Substring(pageHtml.IndexOf(".txt") - 5, 5);
+                if (version != this.version)
+                {
+                    if (MessageBox.Show("检查到新版本！当前版本为" + this.version + "，最新版本为" + version + "!", "检查更新", MessageBoxButtons.OKCancel, MessageBoxIcon.Information) == DialogResult.OK)
+                        Process.Start("http://pan.baidu.com/s/1sjGsFnR");
+                }
+            }
+            catch
+            {
+                Thread.CurrentThread.Abort();
+            }
+        }       
     }
 }

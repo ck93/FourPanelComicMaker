@@ -8,7 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 
 namespace FourPanelComicMaker
-{
+{   
     public partial class Settings : Form
     {
         FontFamily temp = Form1.myFontFamily;
@@ -17,14 +17,16 @@ namespace FourPanelComicMaker
         public Settings()
         {
             InitializeComponent();
+            this.BackgroundImage = new Bitmap(Properties.Resources.resPath + "2.jpg");
             numericUpDown1.Value = Form1.borderWidth;
             textBox1.Text = Form1.myFontFamily.Name;
             textBox2.Text = Form1.sign;
             textBox3.Text = Form1.borderColor.Name;
+            panel1.BackColor = Form1.borderColor;
             if (Form1.borderWidth == 0)
             {
                 textBox3.Enabled = false;
-                button3.Enabled = false;
+                panel1.Enabled = false;
             }
         }
 
@@ -69,12 +71,22 @@ namespace FourPanelComicMaker
             if (numericUpDown1.Value == 0)
             {
                 textBox3.Enabled = false;
-                button3.Enabled = false;
+                panel1.Enabled = false;
             }
             else
             {
                 textBox3.Enabled = true;
-                button3.Enabled = true;
+                panel1.Enabled = true;
+            }
+        }
+
+        private void panel1_Click(object sender, EventArgs e)
+        {
+            if (colorDialog1.ShowDialog() == DialogResult.OK)
+            {
+                tempColor = colorDialog1.Color;
+                textBox3.Text = tempColor.Name;
+                panel1.BackColor = tempColor;
             }
         }
     }
